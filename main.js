@@ -43,6 +43,12 @@ phina.define("MainScene", {
       if (self.status === 'ready') {
         // ボール発射
         self.ball.vy = -self.ball.speed;
+        if (Random.randint(0, 1) === 1) {
+          self.ball.vx = self.ball.speed;
+        }
+        else {
+          self.ball.vx = -self.ball.speed;
+        }
         self.status = 'move';
       }
     };
