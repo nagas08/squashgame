@@ -41,14 +41,17 @@ phina.define("MainScene", {
     // 画面上でタッチが離れた時
     this.onpointend = function () {
       if (self.status === 'ready') {
+        console.log("init vx:"+"%d"+" vy:"+"5d",self.ball.vx, self.ball.vy);
         // ボール発射
         self.ball.vy = -self.ball.speed;
+        // ボールの発射角度を右左に振る
         if (Random.randint(0, 1) === 1) {
           self.ball.vx = self.ball.speed;
         }
         else {
           self.ball.vx = -self.ball.speed;
         }
+        console.log("start vx:"+"%d"+" vy:"+"5d",self.ball.vx, self.ball.vy);
         self.status = 'move';
       }
     };
@@ -75,6 +78,7 @@ phina.define("MainScene", {
     // ボール移動中
     if (this.status === 'move') {
       // ボール移動
+      console.log("vx:"+"%d"+"   vy:"+"%d",ball.vx,ball.vy);
       ball.moveBy(ball.vx, ball.vy);
       // 画面端反射
       // 上
@@ -92,18 +96,39 @@ phina.define("MainScene", {
         ball.right = screenRect.right;
         ball.vx = -ball.vx;
       }
+
       // 落下
+      var self = this;
+
       if (ball.top > screenRect.bottom) {
-        // 準備状態へ
-        this.status = 'ready';
+        // ゲームオーバー表示
+        var label = Label({
+          text: 'GAME OVER\n'+'点数:'+ball.point,
+          fill: 'yellow',
+          fontSize: 64,
+        }).addChildTo(this);
+        label.setPosition(this.gridX.center(), this.gridY.center());
+        // 少し待ってからタイトル画面へ
+        label.tweener.clear()
+          .wait(3000)
+          .call(function () {
+            self.nextLabel = 'main';
+            self.exit();
+          });
       }
+
       // パドルとの反射
       if (ball.hitTestElement(paddle) && ball.vy > 0) {
+        console.log('Hit paddle and ball')
+        ball.point++;
+        console.log("Point:"+"%d",ball.point);
+        ball.speed = ball.speed;
         ball.bottom = paddle.top;
-        ball.vy = -ball.vy;
+        ball.vy = -ball.vy - 3;
         // 当たった位置で角度を変化させる
         var dx = paddle.x - ball.x;
-        ball.vx = -dx / 5;
+        ball.vx = -((dx / 5) + 3);
+        console.log(ball.speed);
       }
     }
   },
@@ -139,6 +164,8 @@ phina.define('Ball', {
     });
     // スピード
     this.speed = 6;
+    // 点数
+    this.point = 0;
   },
 });
 /*
@@ -146,8 +173,9 @@ phina.define('Ball', {
  */
 phina.main(function () {
   // アプリケーションを生成
+  title: 'スカッシュゲーム';
   var app = GameApp({
-    title: 'Break Out',
+    startLabel :'main',
   });
   // fps変更
   app.fps = 60;
