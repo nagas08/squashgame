@@ -9,6 +9,17 @@ var PADDLE_WIDTH = BLOCK_WIDTH * 1.5;
 var PADDLE_HEIGHT = BLOCK_HEIGHT;
 
 var BALL_RADIUS = BLOCK_WIDTH / 8;
+
+/*
+ * アセット
+ */
+
+var ASSETS = {
+  // サウンド
+  sound: {
+    'hit': './button02b.mp3',
+  },
+};
 /*
  * メインシーン
  */
@@ -41,7 +52,7 @@ phina.define("MainScene", {
     // 画面上でタッチが離れた時
     this.onpointend = function () {
       if (self.status === 'ready') {
-        console.log("init vx:"+"%d"+" vy:"+"5d",self.ball.vx, self.ball.vy);
+        console.log("init vx:" + "%d" + " vy:" + "5d", self.ball.vx, self.ball.vy);
         // ボール発射
         self.ball.vy = -self.ball.speed;
         // ボールの発射角度を右左に振る
@@ -51,7 +62,7 @@ phina.define("MainScene", {
         else {
           self.ball.vx = -self.ball.speed;
         }
-        console.log("start vx:"+"%d"+" vy:"+"5d",self.ball.vx, self.ball.vy);
+        console.log("start vx:" + "%d" + " vy:" + "5d", self.ball.vx, self.ball.vy);
         self.status = 'move';
       }
     };
@@ -78,7 +89,7 @@ phina.define("MainScene", {
     // ボール移動中
     if (this.status === 'move') {
       // ボール移動
-      console.log("vx:"+"%d"+"   vy:"+"%d",ball.vx,ball.vy);
+      console.log("vx:" + "%d" + "   vy:" + "%d", ball.vx, ball.vy);
       ball.moveBy(ball.vx, ball.vy);
       // 画面端反射
       // 上
@@ -103,7 +114,7 @@ phina.define("MainScene", {
       if (ball.top > screenRect.bottom) {
         // ゲームオーバー表示
         var label = Label({
-          text: 'GAME OVER\n'+'点数:'+ball.point,
+          text: 'GAME OVER\n' + '点数:' + ball.point,
           fill: 'yellow',
           fontSize: 64,
         }).addChildTo(this);
@@ -120,8 +131,9 @@ phina.define("MainScene", {
       // パドルとの反射
       if (ball.hitTestElement(paddle) && ball.vy > 0) {
         console.log('Hit paddle and ball')
+        SoundManager.play('hit');
         ball.point++;
-        console.log("Point:"+"%d",ball.point);
+        console.log("Point:" + "%d", ball.point);
         ball.speed = ball.speed;
         ball.bottom = paddle.top;
         ball.vy = -ball.vy - 3;
@@ -175,11 +187,12 @@ phina.main(function () {
   // アプリケーションを生成
   title: 'スカッシュゲーム';
   var app = GameApp({
-    startLabel :'main',
+    startLabel: 'main',
+    assets: ASSETS
   });
   // fps変更
   app.fps = 60;
   // 実行
   // 実行
   app.run();
-});
+})
